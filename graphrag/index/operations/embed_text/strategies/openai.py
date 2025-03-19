@@ -20,7 +20,7 @@ from graphrag.index.operations.embed_text.strategies.typing import TextEmbedding
 from graphrag.index.text_splitting.text_splitting import TokenTextSplitter
 from graphrag.index.utils.is_null import is_null
 from graphrag.logger.progress import ProgressTicker, progress_ticker
-
+import ollama
 log = logging.getLogger(__name__)
 
 
@@ -60,8 +60,12 @@ async def run(
     ticker = progress_ticker(callbacks.progress, len(text_batches))
 
     # Embed each chunk of snippets
-    embeddings = await _execute(llm, text_batches, ticker, semaphore)
-    embeddings = _reconstitute_embeddings(embeddings, input_sizes)
+    # embeddings = await _execute(llm, text_batches, ticker, semaphore)
+    # embeddings = _reconstitute_embeddings(embeddings, input_sizes)
+    embeddings = []
+    for inp in texts:
+        embedding = ollama.embeddings(model=llm_config.model, prompt=inp)
+        embeddings.append(embedding["embedding"])
 
     return TextEmbeddingResult(embeddings=embeddings)
 
