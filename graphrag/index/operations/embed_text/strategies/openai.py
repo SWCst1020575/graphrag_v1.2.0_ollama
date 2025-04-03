@@ -61,11 +61,11 @@ async def run(
 
     # Embed each chunk of snippets
     # embeddings = await _execute(llm, text_batches, ticker, semaphore)
-    # embeddings = _reconstitute_embeddings(embeddings, input_sizes)
     embeddings = []
     for inp in texts:
         embedding = ollama.embeddings(model=llm_config.model, prompt=inp)
         embeddings.append(embedding["embedding"])
+    # embeddings = _reconstitute_embeddings(embeddings, input_sizes)
 
     return TextEmbeddingResult(embeddings=embeddings)
 

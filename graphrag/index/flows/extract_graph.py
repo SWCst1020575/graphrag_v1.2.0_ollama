@@ -5,16 +5,20 @@
 
 from typing import Any
 from uuid import uuid4
-
+import ast
 import pandas as pd
 
 from graphrag.cache.pipeline_cache import PipelineCache
 from graphrag.callbacks.workflow_callbacks import WorkflowCallbacks
 from graphrag.config.enums import AsyncType
 from graphrag.index.operations.extract_entities import extract_entities
+from graphrag.index.operations.extract_entities_only import extract_entities_only
+from graphrag.index.operations.extract_relationships import extract_relationships
 from graphrag.index.operations.summarize_descriptions import (
     summarize_descriptions,
 )
+
+import asyncio
 
 
 async def extract_graph(
@@ -30,7 +34,18 @@ async def extract_graph(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """All the steps to create the base entity graph."""
     # this returns a graph for each text unit, to be merged later
-    entities, relationships = await extract_entities(
+    # entities, relationships = await extract_entities(
+    #     text_units,
+    #     callbacks,
+    #     cache,
+    #     text_column="text",
+    #     id_column="id",
+    #     strategy=extraction_strategy,
+    #     async_mode=extraction_async_mode,
+    #     entity_types=entity_types,
+    #     num_threads=extraction_num_threads,
+    # )
+    entities = await extract_entities_only(
         text_units,
         callbacks,
         cache,
@@ -41,7 +56,18 @@ async def extract_graph(
         entity_types=entity_types,
         num_threads=extraction_num_threads,
     )
-
+    relationships = await extract_relationships(
+        text_units,
+        entities,
+        callbacks,
+        cache,
+        text_column="text",
+        id_column="id",
+        strategy=extraction_strategy,
+        async_mode=extraction_async_mode,
+        entity_types=entity_types,
+        num_threads=extraction_num_threads,
+    )
     if not _validate_data(entities):
         error_msg = "Entity Extraction failed. No entities detected during extraction."
         callbacks.error(error_msg)

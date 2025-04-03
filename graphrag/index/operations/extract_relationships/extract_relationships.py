@@ -12,7 +12,7 @@ from graphrag.cache.pipeline_cache import PipelineCache
 from graphrag.callbacks.workflow_callbacks import WorkflowCallbacks
 from graphrag.config.enums import AsyncType
 from graphrag.index.bootstrap import bootstrap
-from graphrag.index.operations.extract_entities.typing import (
+from graphrag.index.operations.extract_relationships.typing import (
     Document,
     EntityExtractStrategy,
     ExtractEntityStrategyType,
@@ -25,8 +25,9 @@ log = logging.getLogger(__name__)
 DEFAULT_ENTITY_TYPES = ["organization", "person", "geo", "event"]
 
 
-async def extract_entities(
+async def extract_relationships(
     text_units: pd.DataFrame,
+    entities: pd.DataFrame,
     callbacks: WorkflowCallbacks,
     cache: PipelineCache,
     text_column: str,
@@ -108,15 +109,18 @@ async def extract_entities(
         nonlocal num_started
         text = row[text_column]
         id = row[id_column]
+        cur_entities = entities[entities['text_unit_ids'].apply(lambda x: id in x)]
+        cur_entities = ", ".join(cur_entities["title"].to_list())
         result = await strategy_exec(
             [Document(text=text, id=id)],
             entity_types,
+            cur_entities,
             callbacks,
             cache,
             strategy_config,
         )
         num_started += 1
-        return [result.entities, result.relationships, result.graph]
+        return [entities, result.relationships, result.graph]
 
     results = await derive_from_rows(
         text_units,
@@ -130,23 +134,23 @@ async def extract_entities(
     relationship_dfs = []
     for result in results:
         if result:
-            entity_dfs.append(pd.DataFrame(result[0]))
+            # entity_dfs.append(pd.DataFrame(result[0]))
             relationship_dfs.append(pd.DataFrame(result[1]))
 
-    entities = _merge_entities(entity_dfs)
+    # entities = _merge_entities(entity_dfs)
     relationships = _merge_relationships(relationship_dfs)
     # # entities.to_csv("entities.csv")
     # text_units.to_csv("text_units.csv")
     # raise Exception(f"entities: {entities}\nrelationships: {relationships}")
 
-    return (entities, relationships)
+    return relationships
 
 
 def _load_strategy(strategy_type: ExtractEntityStrategyType) -> EntityExtractStrategy:
     """Load strategy method definition."""
     match strategy_type:
         case ExtractEntityStrategyType.graph_intelligence:
-            from graphrag.index.operations.extract_entities.graph_intelligence_strategy import (
+            from graphrag.index.operations.extract_relationships.graph_intelligence_strategy import (
                 run_graph_intelligence,
             )
 
@@ -155,7 +159,7 @@ def _load_strategy(strategy_type: ExtractEntityStrategyType) -> EntityExtractStr
         case ExtractEntityStrategyType.nltk:
             bootstrap()
             # dynamically import nltk strategy to avoid dependency if not used
-            from graphrag.index.operations.extract_entities.nltk_strategy import (
+            from graphrag.index.operations.extract_relationships.nltk_strategy import (
                 run as run_nltk,
             )
 

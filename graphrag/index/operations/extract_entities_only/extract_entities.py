@@ -12,7 +12,7 @@ from graphrag.cache.pipeline_cache import PipelineCache
 from graphrag.callbacks.workflow_callbacks import WorkflowCallbacks
 from graphrag.config.enums import AsyncType
 from graphrag.index.bootstrap import bootstrap
-from graphrag.index.operations.extract_entities.typing import (
+from graphrag.index.operations.extract_entities_only.typing import (
     Document,
     EntityExtractStrategy,
     ExtractEntityStrategyType,
@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 DEFAULT_ENTITY_TYPES = ["organization", "person", "geo", "event"]
 
 
-async def extract_entities(
+async def extract_entities_only(
     text_units: pd.DataFrame,
     callbacks: WorkflowCallbacks,
     cache: PipelineCache,
@@ -131,15 +131,15 @@ async def extract_entities(
     for result in results:
         if result:
             entity_dfs.append(pd.DataFrame(result[0]))
-            relationship_dfs.append(pd.DataFrame(result[1]))
+            # relationship_dfs.append(pd.DataFrame(result[1]))
 
     entities = _merge_entities(entity_dfs)
-    relationships = _merge_relationships(relationship_dfs)
+    # relationships = _merge_relationships(relationship_dfs)
     # # entities.to_csv("entities.csv")
     # text_units.to_csv("text_units.csv")
     # raise Exception(f"entities: {entities}\nrelationships: {relationships}")
 
-    return (entities, relationships)
+    return entities
 
 
 def _load_strategy(strategy_type: ExtractEntityStrategyType) -> EntityExtractStrategy:
