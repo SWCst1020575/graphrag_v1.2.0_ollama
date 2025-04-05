@@ -19,7 +19,7 @@ from graphrag.index.typing import ErrorHandlerFn
 from graphrag.index.utils.string import clean_str
 from graphrag.prompts.index.entity_extraction import (
     CONTINUE_PROMPT,
-    CONTINUE_PROMPT_ENTITIES,
+    CONTINUE_PROMPT_RELATIONSHIPS,
     GRAPH_EXTRACTION_PROMPT,
     LOOP_PROMPT,
     LOOP_PROMPT_ENTITIES
@@ -165,7 +165,7 @@ class GraphExtractor:
         # Repeat to ensure we maximize entity count
         for i in range(self._max_gleanings):
             response = await self._llm(
-                CONTINUE_PROMPT_ENTITIES,
+                CONTINUE_PROMPT_RELATIONSHIPS,
                 name=f"extract-continuation-{i}",
                 history=response.history,
             )

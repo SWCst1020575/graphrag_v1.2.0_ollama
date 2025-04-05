@@ -126,4 +126,8 @@ Text: {input_text}
 Output:"""
 
 CONTINUE_PROMPT = "MANY entities and relationships were missed in the last extraction. Remember to ONLY emit entities that match any of the previously extracted types. Add them below using the same format:\n"
+CONTINUE_PROMPT_ENTITIES = "MANY entities were missed in the last extraction. Add them below using the same format:\n"
+CONTINUE_PROMPT_RELATIONSHIPS = "MANY relationships were missed in the last extraction. Remember to ONLY emit entities that match any of the previously extracted types. Add them below using the same format:\n"
 LOOP_PROMPT = "It appears some entities and relationships may have still been missed.  Answer Y or N if there are still entities or relationships that need to be added.\n"
+LOOP_PROMPT_ENTITIES = "It appears some entities may have still been missed.  Answer Y or N if there are still entities that need to be added.\n"
+LOOP_PROMPT_RELATIONSHIPS = "It appears some relationships may have still been missed.  Answer Y or N if there are still relationships that need to be added.\n"

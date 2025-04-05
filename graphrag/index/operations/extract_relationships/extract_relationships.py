@@ -110,7 +110,8 @@ async def extract_relationships(
         text = row[text_column]
         id = row[id_column]
         cur_entities = entities[entities['text_unit_ids'].apply(lambda x: id in x)]
-        cur_entities = ", ".join(cur_entities["title"].to_list())
+        cur_entities = "**, **".join(cur_entities["title"].to_list())
+        cur_entities = f"**{cur_entities}**"
         result = await strategy_exec(
             [Document(text=text, id=id)],
             entity_types,
